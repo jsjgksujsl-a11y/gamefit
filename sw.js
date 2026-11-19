@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gamefit-v04-accounts-catalog';
+const CACHE_NAME = 'gamefit-v05-game-covers';
 const APP_FILES = ['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./about.html','./privacy.html','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png','./supabase-config.js'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_FILES)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE_NAME).map(key=>caches.delete(key)))));self.clients.claim();});

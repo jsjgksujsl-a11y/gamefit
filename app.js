@@ -213,19 +213,35 @@ function loadPc(){const pc=safeRead(STORAGE_KEYS.pc,{});$('cpuInput').value=pc.c
 function getFavorites(){const fav=safeRead(STORAGE_KEYS.favorites,[]);return Array.isArray(fav)?fav:[];}
 function toggleFavorite(id){let fav=getFavorites();fav=fav.includes(id)?fav.filter(x=>x!==id):[...fav,id];safeWrite(STORAGE_KEYS.favorites,fav);queueCloudSync();renderGames();toast(fav.includes(id)?'Добавлено в избранное.':'Удалено из избранного.');}
 const gameCoverCache = new Map();
+const GAME_COVER_CACHE_KEY='gamefit_cover_urls_v1';
 async function resolveGameCover(game){
   if(game.image)return game.image;
   if(gameCoverCache.has(game.id))return gameCoverCache.get(game.id);
   try{
-    const endpoint='https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(game.name)+'&l=english&cc=US';
-    const response=await fetch(endpoint,{headers:{'Accept':'application/json'}});
-    if(!response.ok)throw new Error('Steam search unavailable');
+    const saved=JSON.parse(localStorage.getItem(GAME_COVER_CACHE_KEY)||'{}');
+    if(saved[game.id]&&saved[game.id].url&&saved[game.id].expires>Date.now()){
+      gameCoverCache.set(game.id,saved[game.id].url);
+      return saved[game.id].url;
+    }
+  }catch(_){}
+  try{
+    const steamUrl='https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(game.name)+'&l=english&cc=US';
+    // Steam does not send browser CORS headers; use a read-only public CORS relay.
+    const response=await fetch('https://proxy.cors.dev/'+steamUrl,{credentials:'omit'});
+    if(!response.ok)throw new Error('Steam cover lookup unavailable');
     const data=await response.json();
     const candidates=Array.isArray(data.items)?data.items:[];
     const normalized=game.name.toLowerCase().replace(/[^a-z0-9]+/g,'');
     const match=candidates.find(item=>(item.name||'').toLowerCase().replace(/[^a-z0-9]+/g,'')===normalized)||candidates[0];
     const url=match&&match.id?'https://cdn.akamai.steamstatic.com/steam/apps/'+match.id+'/header.jpg':null;
     gameCoverCache.set(game.id,url);
+    if(url){
+      try{
+        const saved=JSON.parse(localStorage.getItem(GAME_COVER_CACHE_KEY)||'{}');
+        saved[game.id]={url,expires:Date.now()+30*24*60*60*1000};
+        localStorage.setItem(GAME_COVER_CACHE_KEY,JSON.stringify(saved));
+      }catch(_){}
+    }
     return url;
   }catch(_){gameCoverCache.set(game.id,null);return null;}
 }
