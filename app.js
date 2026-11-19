@@ -212,15 +212,42 @@ function savePc(showToast=true){const ok=safeWrite(STORAGE_KEYS.pc,getPc());$('s
 function loadPc(){const pc=safeRead(STORAGE_KEYS.pc,{});$('cpuInput').value=pc.cpu||'';$('gpuInput').value=pc.gpu||'';$('ramInput').value=pc.ram||'';$('storageInput').value=pc.storage||'';$('osInput').value=pc.os||'unknown';$('gpuTypeInput').value=pc.gpuType||'unknown';}
 function getFavorites(){const fav=safeRead(STORAGE_KEYS.favorites,[]);return Array.isArray(fav)?fav:[];}
 function toggleFavorite(id){let fav=getFavorites();fav=fav.includes(id)?fav.filter(x=>x!==id):[...fav,id];safeWrite(STORAGE_KEYS.favorites,fav);queueCloudSync();renderGames();toast(fav.includes(id)?'Добавлено в избранное.':'Удалено из избранного.');}
+const gameCoverCache = new Map();
+async function resolveGameCover(game){
+  if(game.image)return game.image;
+  if(gameCoverCache.has(game.id))return gameCoverCache.get(game.id);
+  try{
+    const endpoint='https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(game.name)+'&l=english&cc=US';
+    const response=await fetch(endpoint,{headers:{'Accept':'application/json'}});
+    if(!response.ok)throw new Error('Steam search unavailable');
+    const data=await response.json();
+    const candidates=Array.isArray(data.items)?data.items:[];
+    const normalized=game.name.toLowerCase().replace(/[^a-z0-9]+/g,'');
+    const match=candidates.find(item=>(item.name||'').toLowerCase().replace(/[^a-z0-9]+/g,'')===normalized)||candidates[0];
+    const url=match&&match.id?'https://cdn.akamai.steamstatic.com/steam/apps/'+match.id+'/header.jpg':null;
+    gameCoverCache.set(game.id,url);
+    return url;
+  }catch(_){gameCoverCache.set(game.id,null);return null;}
+}
+async function loadGameCovers(items){
+  await Promise.all(items.filter(g=>!g.image).map(async game=>{
+    const url=await resolveGameCover(game);
+    if(!url)return;
+    const img=document.querySelector('[data-game-cover="'+game.id+'"]');
+    if(img){img.src=url;img.style.display='block';}
+    if(selectedGameId===game.id)updateQuickPreview();
+  }));
+}
 function renderGames(){
   const query=$('gameSearch').value.trim().toLowerCase();const fav=getFavorites();
   const items=GAME_DATA.filter(g=>(activeFilter==='all'||(activeFilter==='favorites'?fav.includes(g.id):g.tags.includes(activeFilter)))&&(`${g.name} ${g.genre} ${g.description}`.toLowerCase().includes(query)));
-  $('gameGrid').innerHTML=items.map(g=>`<article class="game-card"><div class="game-banner" style="background:${g.color}"><span class="game-emoji" aria-hidden="true">${g.emoji}</span>${g.image?`<img class="game-art-image" src="${g.image}" alt="Обложка игры ${escapeHtml(g.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">`:''}<span class="game-type">${escapeHtml(g.genre.toUpperCase())}</span></div><div class="game-content"><h3>${escapeHtml(g.name)}</h3><p>${escapeHtml(g.description)}</p><div class="game-meta">${g.min?`<span class="meta-pill">RAM: ${g.min.ram} ГБ минимум</span><span class="meta-pill">${g.rec?'Есть рекомендованные':'Минимум'}</span>`:'<span class="meta-pill">Требования уточняются</span>'}</div><div class="game-actions"><button class="button secondary" data-open-game="${g.id}">${g.min?'Требования →':'Подробнее →'}</button><button class="favorite-btn ${fav.includes(g.id)?'active':''}" data-fav="${g.id}" aria-label="${fav.includes(g.id)?'Убрать из':'Добавить в'} избранное">${fav.includes(g.id)?'★':'☆'}</button></div></div></article>`).join('');
+  $('gameGrid').innerHTML=items.map(g=>`<article class="game-card"><div class="game-banner" style="background:${g.color}"><span class="game-emoji" aria-hidden="true">${g.emoji}</span><img class="game-art-image" data-game-cover="${g.id}" src="${g.image||''}" alt="Обложка игры ${escapeHtml(g.name)}" loading="lazy" referrerpolicy="no-referrer" style="${g.image?'':'display:none'}" onerror="this.style.display='none'"><span class="game-type">${escapeHtml(g.genre.toUpperCase())}</span></div><div class="game-content"><h3>${escapeHtml(g.name)}</h3><p>${escapeHtml(g.description)}</p><div class="game-meta">${g.min?`<span class="meta-pill">RAM: ${g.min.ram} ГБ минимум</span><span class="meta-pill">${g.rec?'Есть рекомендованные':'Минимум'}</span>`:'<span class="meta-pill">Требования уточняются</span>'}</div><div class="game-actions"><button class="button secondary" data-open-game="${g.id}">${g.min?'Требования →':'Подробнее →'}</button><button class="favorite-btn ${fav.includes(g.id)?'active':''}" data-fav="${g.id}" aria-label="${fav.includes(g.id)?'Убрать из':'Добавить в'} избранное">${fav.includes(g.id)?'★':'☆'}</button></div></div></article>`).join('');
   $('emptyState').classList.toggle('hidden',items.length>0);
+  loadGameCovers(items);
 }
 function renderQuickSelect(){ $('quickGameSelect').innerHTML=GAME_DATA.map(g=>`<option value="${g.id}">${escapeHtml(g.name)}</option>`).join('');updateQuickPreview();}
 function getGame(id){return GAME_DATA.find(g=>g.id===id)||GAME_DATA[0];}
-function updateQuickPreview(){selectedGameId=$('quickGameSelect').value;const g=getGame(selectedGameId);$('quickGameArt').style.background=g.color;$('quickGameArt').innerHTML=`<span class="preview-fallback" aria-hidden="true">${g.emoji}</span>${g.image?`<img src="${g.image}" alt="Обложка ${escapeHtml(g.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">`:''}`;$('quickGameTitle').textContent=g.name;$('quickGameDesc').textContent=g.description;}
+function updateQuickPreview(){selectedGameId=$('quickGameSelect').value;const g=getGame(selectedGameId);const cover=g.image||gameCoverCache.get(g.id);$('quickGameArt').style.background=g.color;$('quickGameArt').innerHTML=`<span class="preview-fallback" aria-hidden="true">${g.emoji}</span>${cover?`<img src="${cover}" alt="Обложка ${escapeHtml(g.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">`:''}`;$('quickGameTitle').textContent=g.name;$('quickGameDesc').textContent=g.description;if(!cover)resolveGameCover(g).then(url=>{if(url&&selectedGameId===g.id)updateQuickPreview();});}
 function renderReqLine(label,value){return `<div class="req-row"><span>${label}</span><b>${escapeHtml(value??'Не указано')}</b></div>`;}
 function openGameDetail(id){const g=getGame(id);$('quickGameSelect').value=g.id;updateQuickPreview();$('checker').scrollIntoView({behavior:'smooth'});$('resultPanel').classList.remove('hidden');if(!g.min){$('resultPanel').innerHTML=`<div class="detail-head"><div><div class="panel-kicker">КАТАЛОГ · ТРЕБОВАНИЯ НЕ ПРОВЕРЕНЫ</div><h3>${g.emoji} ${escapeHtml(g.name)}</h3><p class="result-summary">${escapeHtml(g.description)}</p></div><button class="text-button" id="closeDetail">Скрыть ×</button></div><div class="requirement-card"><h4>Системные требования пока не добавлены</h4><p class="muted">Мы не будем придумывать характеристики. Открой страницу игры и проверь официальные сведения перед покупкой.</p><a class="button secondary" href="${g.url}" target="_blank" rel="noopener noreferrer">Найти игру в Steam ↗</a></div><p class="result-foot">GameFit пока не сравнивает этот компьютер с требованиями данной игры.</p>`;$('closeDetail').addEventListener('click',()=>{$('resultPanel').classList.add('hidden');});return;}$('resultPanel').innerHTML=`<div class="detail-head"><div><div class="panel-kicker">СИСТЕМНЫЕ ТРЕБОВАНИЯ · ${escapeHtml(g.updated)}</div><h3>${g.emoji} ${escapeHtml(g.name)}</h3><p class="result-summary">${escapeHtml(g.description)} <a href="${g.url}" target="_blank" rel="noopener noreferrer">Открыть источник ↗</a></p></div><button class="text-button" id="closeDetail">Скрыть ×</button></div><div class="requirements-columns">${renderRequirementsColumn('Минимальные требования',g.min)}${g.rec?renderRequirementsColumn('Рекомендуемые требования',g.rec):'<div class="requirement-card"><h4>Рекомендованные требования</h4><p class="muted">Издатель не указывает отдельные рекомендованные характеристики на выбранной странице.</p></div>'}</div><p class="result-foot">Источник: ${escapeHtml(g.source)}. Значения могут измениться после обновлений игры. Проверь страницу источника перед покупкой.</p>`;$('closeDetail').addEventListener('click',()=>{$('resultPanel').classList.add('hidden');});}
 function renderRequirementsColumn(title,spec){return `<div class="requirement-card"><h4>${title}</h4>${renderReqLine('Процессор',spec.cpu)}${renderReqLine('Оперативная память',spec.ram+' ГБ')}${renderReqLine('Видеокарта',spec.gpu)}${renderReqLine('Место на диске',spec.storage?spec.storage+' ГБ':'Не указано на странице')}${renderReqLine('ОС',spec.os)}<p class="requirement-note">${escapeHtml(spec.notes||'')}</p></div>`;}
