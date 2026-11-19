@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="GameFit помогает сравнить характеристики компьютера с системными требованиями игр и понять, что нужно проверить перед покупкой.">
+  <title>GameFit — проверка ПК для игр</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg-glow glow-a"></div><div class="bg-glow glow-b"></div>
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="GameFit — главная"><span class="brand-mark">G</span><span>GAME<span class="brand-accent">FIT</span></span></a>
+    <nav class="nav" id="mainNav" aria-label="Главная навигация">
+      <a href="#catalog">Каталог игр</a><a href="#checker">Проверить ПК</a><a href="#how">Как работает</a>
+    </nav>
+    <div class="top-actions"><button class="icon-button" id="themeToggle" title="Переключить тему" aria-label="Переключить тему">☼</button><button class="install-button hidden" id="installBtn">Установить приложение</button><button class="menu-button" id="menuToggle" aria-label="Открыть меню">☰</button></div>
+  </header>
+
+  <main id="home">
+    <section class="hero section-wrap">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse-dot"></span> БЕТА-ВЕРСИЯ · GAMEFIT 0.3</div>
+        <h1>Твой ПК.<br><span class="gradient-text">Твои игры.</span><br>Без догадок.</h1>
+        <p class="hero-lead">Сравни характеристики компьютера с опубликованными требованиями игры. Узнай, что подходит, что не совпадает и что ещё нужно проверить.</p>
+        <div class="hero-actions"><a class="button primary" href="#checker">Проверить мой ПК <span>→</span></a><a class="button secondary" href="#catalog">Посмотреть игры</a></div>
+        <div class="trust-row"><span>✓ Бесплатно</span><span>✓ Без регистрации</span><span>✓ Данные остаются на устройстве</span></div>
+      </div>
+      <div class="hero-visual" aria-label="Иллюстрация панели проверки компьютера">
+        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+        <div class="device-card">
+          <div class="device-top"><span class="tiny-dot"></span><span class="tiny-dot"></span><span class="tiny-dot"></span><span class="device-label">GAMEFIT / PC SCAN</span></div>
+          <div class="device-chip">▦</div><div class="device-title">SYSTEM<br>READY?</div>
+          <div class="device-line"><span>PROCESSOR</span><b>••••••••</b></div><div class="device-line"><span>GRAPHICS</span><b>••••••••</b></div><div class="device-line"><span>MEMORY</span><b>••••••••</b></div>
+          <div class="device-bottom"><span class="scan-ring">✓</span><span>CHECK YOUR SETUP</span></div>
+        </div>
+        <div class="float-chip chip-top">⚡ Проверка совместимости</div><div class="float-chip chip-bottom">🎮 Каталог игр</div>
+      </div>
+    </section>
+
+    <section class="stats section-wrap" aria-label="Возможности GameFit">
+      <div><b>01</b><span>Каталог с требованиями</span></div><div><b>02</b><span>Сохранённый профиль ПК</span></div><div><b>03</b><span>Честная оценка без выдуманного FPS</span></div><div><b>04</b><span>Работает и без аккаунта</span></div>
+    </section>
+
+    <section class="section-wrap section-block" id="checker">
+      <div class="section-heading"><div><div class="eyebrow">ПЕРСОНАЛЬНАЯ ПРОВЕРКА</div><h2>Сначала познакомимся<br>с твоим компьютером</h2></div><p>Заполни известные характеристики или попробуй быстро определить часть данных через браузер. Автоопределение приблизительное.</p></div>
+      <div class="checker-layout">
+        <div class="panel pc-panel">
+          <div class="panel-head"><div><span class="panel-kicker">МОЙ КОМПЬЮТЕР</span><h3>Характеристики ПК</h3></div><span class="save-state" id="saveState">● Сохранение включено</span></div>
+          <div class="detect-box"><div class="detect-icon">⌁</div><div class="detect-copy"><b>Быстрое определение</b><span>Браузер может сообщить примерную память, число логических потоков и иногда название графики.</span></div><button class="button mini secondary" id="detectBtn">Определить</button></div>
+          <div class="form-grid">
+            <label class="field"><span>Процессор (CPU)</span><input id="cpuInput" type="text" placeholder="Например, Intel Core i5-8250U" autocomplete="off"><small>Точную модель браузер обычно не раскрывает.</small></label>
+            <label class="field"><span>Видеокарта (GPU)</span><input id="gpuInput" type="text" placeholder="Например, Intel UHD Graphics 620" autocomplete="off"><small>Название может быть скрыто настройками приватности.</small></label>
+            <label class="field"><span>Оперативная память (RAM), ГБ</span><input id="ramInput" type="number" min="1" max="512" step="1" placeholder="Например, 8"></label>
+            <label class="field"><span>Свободное место, ГБ</span><input id="storageInput" type="number" min="0" max="100000" step="1" placeholder="Например, 120"></label>
+            <label class="field"><span>Операционная система</span><select id="osInput"><option value="unknown">Не знаю</option><option value="win11">Windows 11</option><option value="win10">Windows 10</option><option value="older">Windows 8 или старше</option><option value="mac">macOS</option><option value="linux">Linux</option></select></label>
+            <label class="field"><span>Тип графики (если знаешь)</span><select id="gpuTypeInput"><option value="unknown">Не знаю</option><option value="integrated">Встроенная графика</option><option value="discrete">Отдельная видеокарта</option></select></label>
+          </div>
+          <div class="form-actions"><button class="button primary" id="savePcBtn">Сохранить профиль</button><button class="text-button" id="clearPcBtn">Очистить поля</button></div>
+          <div class="privacy-note">🔒 Профиль, избранное и настройки сохраняются только в этом браузере. GameFit не отправляет характеристики на сервер.</div>
+          <div class="detect-output hidden" id="detectOutput" aria-live="polite"></div>
+        </div>
+        <aside class="panel selected-panel">
+          <div class="panel-kicker">БЫСТРЫЙ СТАРТ</div><h3>Какую игру проверим?</h3>
+          <label class="field"><span>Выбери игру</span><select id="quickGameSelect"></select></label>
+          <div class="selected-game-art" id="quickGameArt"><span>🎮</span></div>
+          <h4 id="quickGameTitle">Выбери игру из списка</h4><p id="quickGameDesc" class="muted">Мы сравним известные характеристики компьютера с минимальными требованиями.</p>
+          <button class="button primary full" id="quickCheckBtn">Проверить совместимость <span>→</span></button>
+          <div class="small-divider"></div><div class="mini-tip"><span>💡</span><p>Не знаешь модель CPU или GPU? Посмотри подсказку <a href="#how">ниже на странице</a>.</p></div>
+        </aside>
+      </div>
+      <div class="result-panel hidden" id="resultPanel" aria-live="polite"></div>
+    </section>
+
+    <section class="section-wrap section-block" id="catalog">
+      <div class="section-heading"><div><div class="eyebrow">БИБЛИОТЕКА GAMEFIT</div><h2>Найди свою игру</h2></div><p>В каталоге 16 игр с обложками и системными требованиями. Это стартовая база, а не весь список существующих игр — её можно расширять. Требования снабжены ссылками на издателей или магазины.</p></div>
+      <div class="catalog-tools"><div class="search-wrap"><span>⌕</span><input id="gameSearch" type="search" placeholder="Поиск игры…" aria-label="Поиск игры"></div><div class="filter-row" id="filterRow"><button class="filter-chip active" data-filter="all">Все игры</button><button class="filter-chip" data-filter="co-op">Кооператив</button><button class="filter-chip" data-filter="sandbox">Песочница</button><button class="filter-chip" data-filter="competitive">Соревновательные</button><button class="filter-chip" data-filter="favorites">★ Избранное</button></div></div>
+      <div class="game-grid" id="gameGrid"></div>
+      <div class="empty-state hidden" id="emptyState"><span>⌕</span><b>Ничего не найдено</b><p>Попробуй изменить запрос или фильтр.</p></div>
+    </section>
+
+    <section class="section-wrap section-block" id="how">
+      <div class="section-heading"><div><div class="eyebrow">ПРОСТО И ПРОЗРАЧНО</div><h2>Как пользоваться GameFit</h2></div><p>Проверка помогает заметить явные несовпадения, но не заменяет игровые тесты на конкретном компьютере.</p></div>
+      <div class="how-grid">
+        <article class="how-card"><div class="how-number">01</div><div class="how-icon">⌨</div><h3>Укажи компоненты</h3><p>Введи процессор, видеокарту, RAM и свободное место. Можно заполнить не всё сразу.</p></article>
+        <article class="how-card"><div class="how-number">02</div><div class="how-icon">▤</div><h3>Выбери игру</h3><p>Открой карточку игры и посмотри минимальные и рекомендуемые требования из источника.</p></article>
+        <article class="how-card"><div class="how-number">03</div><div class="how-icon">✓</div><h3>Пойми результат</h3><p>GameFit отметит проверенные параметры. CPU и GPU не получат ложную оценку без достоверной базы тестов.</p></article>
+      </div>
+      <div class="help-grid">
+        <div class="panel help-panel"><div class="panel-kicker">ГДЕ ПОСМОТРЕТЬ ХАРАКТЕРИСТИКИ</div><h3>Не знаешь свой процессор или видеокарту?</h3><ol><li>Нажми <b>Win + R</b>.</li><li>Введи <code>dxdiag</code> и нажми Enter.</li><li>На вкладке «Система» найди процессор и память.</li><li>На вкладке «Экран» найди название графического устройства.</li></ol><p class="muted small">На некоторых компьютерах вкладок «Экран» может быть несколько. Если сомневаешься — попроси взрослого помочь посмотреть характеристики.</p></div>
+        <div class="panel help-panel"><div class="panel-kicker">ЧТО ОЗНАЧАЮТ РЕЗУЛЬТАТЫ</div><div class="legend-item"><span class="legend-dot good"></span><div><b>Проверено — подходит</b><p>Указанное значение не ниже опубликованного минимума.</p></div></div><div class="legend-item"><span class="legend-dot bad"></span><div><b>Ниже минимума</b><p>Введённое значение меньше указанного в требованиях.</p></div></div><div class="legend-item"><span class="legend-dot neutral"></span><div><b>Нужно проверить</b><p>GameFit не может надёжно сравнить этот параметр автоматически.</p></div></div></div>
+      </div>
+    </section>
+
+    <section class="section-wrap about-strip"><div><div class="eyebrow">ПРОЕКТ В РАЗРАБОТКЕ</div><h2>GameFit становится лучше<br>вместе с игроками.</h2><p>Это ранняя версия. Нам особенно важны идеи, ошибки и запросы на новые игры.</p></div><a class="button secondary" href="#checker">Проверить свой ПК ↗</a></section>
+  </main>
+  <footer class="footer"><a class="brand" href="#home"><span class="brand-mark">G</span><span>GAME<span class="brand-accent">FIT</span></span></a><span>Независимый экспериментальный проект · 2026</span><span><a href="about.html">О проекте</a> · <a href="privacy.html">Конфиденциальность</a></span></footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
