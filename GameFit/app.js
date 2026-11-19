@@ -1,0 +1,153 @@
+'use strict';
+
+const GAME_DATA = [
+  {
+    id:'peak', name:'PEAK', emoji:'⛰️', image:'https://gamedaily.com/.image/MTU6MDAwMDAwMDAwMDAzNjU4/peak-key-art.png?profile=share16-9', genre:'Кооператив', tags:['co-op'], category:'co-op', color:'linear-gradient(120deg,#315c65,#1d3150)', description:'Кооперативное восхождение на гору с друзьями.',
+    developer:'Landfall / Aggro Crab', platform:'Windows 10/11 · 64-bit',
+    min:{cpu:'Intel Core i5 @ 2.5 GHz или эквивалент', ram:8, gpu:'NVIDIA GeForce GTX 1060 или AMD Radeon RX 6600 XT', gpuVram:null, storage:16, os:'Windows 10 64-bit', notes:'DirectX 12; 64-разрядный процессор и ОС.'},
+    rec:{cpu:'Intel Core i5 @ 3.0 GHz или AMD Ryzen 5 или эквивалент', ram:16, gpu:'NVIDIA GeForce RTX 2060 или AMD Radeon RX 7600 XT', gpuVram:null, storage:16, os:'Windows 11 64-bit', notes:'DirectX 12; 64-разрядный процессор и ОС.'},
+    source:'Steam — PEAK', url:'https://store.steampowered.com/app/3527290/PEAK/', updated:'Проверено 19.11.2026'
+  },
+  {
+    id:'minecraft-java', name:'Minecraft: Java Edition', emoji:'🧱', image:'https://cdn2.steamgriddb.com/grid/6db2fc0f9848c8830f2c5ad73e78ea75.png', genre:'Песочница', tags:['sandbox'], category:'sandbox', color:'linear-gradient(120deg,#426b45,#263f39)', description:'Открытый мир, строительство и приключения. Требования зависят от версии и модов.',
+    developer:'Mojang Studios', platform:'Windows 10/11 · macOS · Linux (64-bit)',
+    min:{cpu:'Intel Core i3-10100 / AMD Ryzen 3 3100 или эквивалент; 4 физических ядра', ram:8, gpu:'Vulkan 1.3; минимум 2 ГБ VRAM с дискретной графикой (или подходящая интегрированная графика)', gpuVram:2, storage:null, os:'64-bit Windows 10, Windows on ARM, macOS 12+ или Linux', notes:'Минимальная цель: 1080p, 30 FPS, Fast preset. Для встроенной графики указано 12 ГБ RAM.'},
+    rec:{cpu:'Intel Core i5-12400 / AMD Ryzen 5 5600 или эквивалент', ram:16, gpu:'NVIDIA GeForce RTX 2060 / AMD Radeon RX 5600 XT / Intel Arc A580 или эквивалент', gpuVram:6, storage:null, os:'64-bit Windows 11, macOS 14+ или Linux', notes:'Рекомендуемая цель: 1080p, 60 FPS, Fancy preset.'},
+    source:'Minecraft.net — требования Java Edition', url:'https://www.minecraft.net/en-us/store/minecraft-java-bedrock-edition-pc', updated:'Проверено 19.11.2026'
+  },
+  {
+    id:'roblox', name:'Roblox', emoji:'🟦', genre:'Платформа', tags:['sandbox','co-op'], category:'sandbox', color:'linear-gradient(120deg,#4f6c9c,#28344e)', description:'Платформа с тысячами пользовательских игр и впечатлений.',
+    developer:'Roblox Corporation', platform:'Windows 10/11 · 64-bit',
+    min:{cpu:'Современный процессор; ориентир поддержки — 1,6 ГГц или выше', ram:1, gpu:'Поддержка DirectX 10 или выше (feature level)', gpuVram:null, storage:0.3, os:'64-bit Windows 10 или Windows 11', notes:'Производительность зависит от конкретного пользовательского режима. Roblox рекомендует более современный компьютер для лучшего опыта.'},
+    rec:null,
+    source:'Roblox Support — требования к компьютеру', url:'https://en.help.roblox.com/hc/en-us/articles/203312800-Computer-Hardware-Operating-System-Requirements', updated:'Проверено 19.11.2026'
+  },
+  {
+    id:'rocket-league', name:'Rocket League', emoji:'🚗', image:'https://www.rocketleague.com/rr7/rl_evergreen-BuFUX3Ml.jpg', genre:'Спортивная', tags:['competitive','co-op'], category:'competitive', color:'linear-gradient(120deg,#397e9b,#263d75)', description:'Футбол на машинах: матчи, трюки и командная игра.',
+    developer:'Psyonix', platform:'Windows 64-bit',
+    min:{cpu:'2,5 ГГц, двухъядерный процессор', ram:4, gpu:'NVIDIA GeForce GTX 760 / AMD Radeon R9 270X или лучше', gpuVram:null, storage:20, os:'Windows 7 64-bit или новее', notes:'DirectX 11; требуется широкополосное подключение к интернету.'},
+    rec:{cpu:'3,0+ ГГц, четырёхъядерный процессор', ram:8, gpu:'NVIDIA GeForce GTX 1060 / AMD Radeon RX 470 или лучше', gpuVram:null, storage:20, os:'Windows 7 64-bit или новее', notes:'Опубликованные рекомендованные характеристики для Windows.'},
+    source:'Epic Games Support — требования Rocket League', url:'https://www.epicgames.com/help/en-US/c-37599050/c-Trending_0/a10011593', updated:'Проверено 19.11.2026'
+  },
+  {
+    id:'euro-truck-2', name:'Euro Truck Simulator 2', emoji:'🚛', image:'https://www.pjsgames.com/cdn/shop/files/card-euro-truck-simulator-2-pc-steam-game.jpg?v=1755874718&width=1280', genre:'Симулятор', tags:['sandbox'], category:'sandbox', color:'linear-gradient(120deg,#557b62,#283f4b)', description:'Спокойные поездки по дорогам Европы на грузовике.',
+    developer:'SCS Software', platform:'Windows 10 64-bit · macOS · Linux',
+    min:{cpu:'Intel Core i5-6400 / AMD Ryzen 3 1200 или аналогичный', ram:8, gpu:'NVIDIA GeForce GTX 660 / AMD Radeon RX 460 / Intel HD 630 (2 ГБ)', gpuVram:2, storage:25, os:'Windows 10 64-bit', notes:'Указанный объём диска относится к базовой игре; дополнения потребуют дополнительного места.'},
+    rec:{cpu:'Intel Core i5-9600 / AMD Ryzen 5 3600 или аналогичный', ram:12, gpu:'NVIDIA GeForce GTX 1660 / AMD Radeon RX 590 (2 ГБ)', gpuVram:2, storage:25, os:'Windows 10 64-bit', notes:'Рекомендованные характеристики для Windows.'},
+    source:'Steam — Euro Truck Simulator 2', url:'https://store.steampowered.com/app/227300/Euro_Truck_Simulator_2/', updated:'Проверено 19.11.2026'
+  },
+  {
+    id:'stardew-valley', name:'Stardew Valley', emoji:'🌱', image:'https://images.igdb.com/igdb/image/upload/t_1080p/xrpmydnu9rpxvxfjkiu7.jpg?format=auto&quality=75&width=1200', genre:'Ферма и уют', tags:['sandbox','co-op'], category:'sandbox', color:'linear-gradient(120deg,#6d9b61,#385c53)', description:'Ферма, рыбалка, исследование долины и совместная игра.',
+    developer:'ConcernedApe', platform:'Windows · macOS · Linux',
+    min:{cpu:'2 ГГц', ram:2, gpu:'256 МБ видеопамяти, Shader Model 3.0+', gpuVram:null, storage:0.5, os:'Windows 10 или новее для актуального клиента Steam; также macOS и Linux', notes:'Steam Client с 1 января 2024 года поддерживает Windows 10 и новее. В требованиях самой игры также указаны macOS и Linux.'},
+    rec:null,
+    source:'Steam — Stardew Valley', url:'https://store.steampowered.com/app/413150/Stardew_Valley/', updated:'Проверено 19.11.2026'
+  }
+  ,{
+    id:'content-warning', name:'Content Warning', emoji:'📹', image:'https://cdn.akamai.steamstatic.com/steam/apps/2881650/header.jpg', genre:'Кооператив', tags:['co-op'], category:'co-op', color:'linear-gradient(120deg,#575b50,#242b2a)', description:'Снимайте необычные и страшноватые события вместе с друзьями.',
+    developer:'Landfall', platform:'Windows 10 · 64-bit',
+    min:{cpu:'Intel Core i5 @ 2.5 GHz или эквивалент',ram:8,gpu:'NVIDIA GeForce GTX 1050 Ti / AMD R9 380',gpuVram:null,storage:4,os:'Windows 10 64-bit',notes:'DirectX 11; требуется 64-разрядная система и широкополосный интернет.'},
+    rec:{cpu:'Intel Core i5 @ 3.0 GHz / AMD Ryzen 5 или эквивалент',ram:16,gpu:'NVIDIA GeForce GTX 1060 / AMD RX 470 или эквивалент',gpuVram:null,storage:6,os:'Windows 11 64-bit',notes:'DirectX 12.'},
+    source:'Steam — Content Warning',url:'https://store.steampowered.com/app/2881650/Content_Warning/',updated:'Проверено 19.11.2026'
+  },{
+    id:'human-fall-flat', name:'Human: Fall Flat', emoji:'🧍', image:'https://cdn.akamai.steamstatic.com/steam/apps/477160/header.jpg', genre:'Кооператив', tags:['co-op','sandbox'], category:'co-op', color:'linear-gradient(120deg,#729aa3,#344e66)', description:'Забавная физическая головоломка, которую можно проходить вместе.',
+    developer:'No Brakes Games', platform:'Windows · 64-bit',
+    min:{cpu:'Intel Core2 Duo E6750 / AMD Athlon 64 X2 6000+ или эквивалент',ram:1,gpu:'GeForce GT 740 (2 ГБ) / Radeon HD 5770 (1 ГБ)',gpuVram:null,storage:0.5,os:'Windows (современный клиент Steam требует Windows 10+)',notes:'Опубликованные игровые требования старые. Сверяй совместимость клиента Steam и ОС отдельно.'},
+    rec:{cpu:'Intel Core2 Quad Q9300 / AMD A10-5800K или эквивалент',ram:2,gpu:'GeForce GTX 460 / Radeon HD 7770',gpuVram:null,storage:0.5,os:'Windows',notes:'Требования приведены со страницы Steam; фактическая работа зависит от уровня и обновлений.'},
+    source:'Steam — Human: Fall Flat',url:'https://store.steampowered.com/app/477160/Human_Fall_Flat/',updated:'Проверено 19.11.2026'
+  },{
+    id:'overcooked-2', name:'Overcooked! 2', emoji:'🍳', image:'https://gaming-cdn.com/images/products/2705/orig/overcooked-2-pc-mac-jogo-steam-cover.jpg?v=1705337295', genre:'Кооператив', tags:['co-op'], category:'co-op', color:'linear-gradient(120deg,#4a9bc7,#28446d)', description:'Весёлая командная готовка: распределяйте задачи и успевайте вместе.',
+    developer:'Ghost Town Games', platform:'Windows · macOS · Linux',
+    min:{cpu:'Intel i3-2100 / AMD A8-5600K',ram:4,gpu:'GeForce GTX 630 / Radeon HD 6570',gpuVram:null,storage:3,os:'Windows 7 64-bit или новее',notes:'DirectX 11. Для актуальной версии Steam нужна современная поддерживаемая ОС.'},
+    rec:null,source:'Steam — Overcooked! 2',url:'https://store.steampowered.com/app/728880/Overcooked_2/',updated:'Проверено 19.11.2026'
+  },{
+    id:'among-us', name:'Among Us', emoji:'🚀', image:'https://cdn.akamai.steamstatic.com/steam/apps/945360/header.jpg', genre:'Компания', tags:['co-op','competitive'], category:'co-op', color:'linear-gradient(120deg,#455d9c,#262f56)', description:'Командная игра на общение, наблюдательность и дедукцию.',
+    developer:'Innersloth', platform:'Windows 10',
+    min:{cpu:'Intel i3-4330',ram:1,gpu:'Intel HD Graphics 4600',gpuVram:null,storage:null,os:'Windows 10',notes:'Минимальные требования опубликованы в Steam. Подключение к интернету нужно для сетевой игры.'},
+    rec:{cpu:'Intel i3-4330',ram:4,gpu:'NVIDIA GTX 650',gpuVram:null,storage:null,os:'Windows 10 64-bit',notes:'Рекомендованные требования со страницы Steam.'},
+    source:'Steam — Among Us',url:'https://store.steampowered.com/app/945360/Among_Us/',updated:'Проверено 19.11.2026'
+  },{
+    id:'portal-2', name:'Portal 2', emoji:'🌀', image:'https://cdn.akamai.steamstatic.com/steam/apps/620/header.jpg', genre:'Головоломка', tags:['co-op'], category:'co-op', color:'linear-gradient(120deg,#537caa,#273b5f)', description:'Научно-фантастические головоломки; есть отдельный кооперативный режим.',
+    developer:'Valve', platform:'Windows · Linux',
+    min:{cpu:'3.0 GHz P4 / Dual Core 2.0 GHz или AMD64X2',ram:2,gpu:'128 МБ, Pixel Shader 2.0b; GeForce 7600 / Radeon X800 / Intel HD 2000 или лучше',gpuVram:null,storage:8,os:'Windows 7 / Vista / XP (старые требования)',notes:'Требования к игре старые; Steam Client сейчас требует Windows 10 или новее.'},
+    rec:null,source:'Steam — Portal 2',url:'https://store.steampowered.com/app/620/Portal_2/',updated:'Проверено 19.11.2026'
+  },{
+    id:'dont-starve-together', name:"Don't Starve Together", emoji:'🌲', image:'https://cdn.akamai.steamstatic.com/steam/apps/322330/header.jpg', genre:'Выживание и кооператив', tags:['co-op','sandbox'], category:'sandbox', color:'linear-gradient(120deg,#796a4a,#2e423d)', description:'Собирайте ресурсы и исследуйте необычный мир вместе.',
+    developer:'Klei Entertainment', platform:'Windows · macOS · Linux',
+    min:{cpu:'1.7 GHz или лучше',ram:1,gpu:'Radeon HD 5450 или лучше; 256 МБ',gpuVram:null,storage:3,os:'Windows (опубликованный список ОС устарел)',notes:'Для сетевой игры требуется широкополосное подключение. Минимальные требования на странице Steam давно не обновлялись.'},
+    rec:null,source:"Steam — Don't Starve Together",url:'https://store.steampowered.com/app/322330/Dont_Starve_Together/',updated:'Проверено 19.11.2026'
+  },{
+    id:'slime-rancher', name:'Slime Rancher', emoji:'🟢', image:'https://cdn.akamai.steamstatic.com/steam/apps/433340/header.jpg', genre:'Приключение', tags:['sandbox'], category:'sandbox', color:'linear-gradient(120deg,#70b9ad,#365b68)', description:'Исследуйте яркий мир и ухаживайте за забавными слаймами.',
+    developer:'Monomi Park', platform:'Windows · macOS · Linux',
+    min:{cpu:'2.2 GHz Dual Core',ram:4,gpu:'512 МБ видеопамяти, DirectX 11',gpuVram:null,storage:1,os:'Windows 7 или новее (Steam Client требует Windows 10+)',notes:'Опубликованные минимальные требования; отдельные уровни и настройки могут менять производительность.'},
+    rec:null,source:'Steam Support — Slime Rancher',url:'https://store.steampowered.com/app/433340/Slime_Rancher/',updated:'Проверено 19.11.2026'
+  },{
+    id:'powerwash-simulator', name:'PowerWash Simulator', emoji:'🧼', image:'https://cdn.akamai.steamstatic.com/steam/apps/1290000/header.jpg', genre:'Симулятор', tags:['sandbox'], category:'sandbox', color:'linear-gradient(120deg,#56a7c9,#31506b)', description:'Расслабляющий симулятор мойки и уборки.',
+    developer:'FuturLab', platform:'Windows 8 64-bit или новее',
+    min:{cpu:'Intel i5-760 / AMD Phenom II',ram:4,gpu:'GeForce GTX 760 / AMD R7-260X',gpuVram:null,storage:6,os:'Windows 8 64-bit или новее',notes:'DirectX 11; нужен 64-разрядный процессор и ОС. Steam Client требует Windows 10+.'},
+    rec:null,source:'Steam — PowerWash Simulator',url:'https://store.steampowered.com/app/1290000/PowerWash_Simulator/',updated:'Проверено 19.11.2026'
+  },{
+    id:'the-sims-4', name:'The Sims 4', emoji:'🏡', image:'https://cdn.akamai.steamstatic.com/steam/apps/1222670/header.jpg', genre:'Симулятор жизни', tags:['sandbox'], category:'sandbox', color:'linear-gradient(120deg,#72bdc2,#355f79)', description:'Создавайте персонажей, дома и собственные истории.',
+    developer:'Maxis', platform:'Windows 10 · 64-bit',
+    min:{cpu:'Intel Core i3-3220 / AMD Ryzen 3 1200 или лучше',ram:4,gpu:'128 МБ VRAM, Pixel Shader 3.0; GeForce 6600 / Radeon X1300 / Intel GMA X4500 или лучше',gpuVram:null,storage:26,os:'Windows 10 64-bit',notes:'Нужны EA Account, Steam Account и EA app для версии Steam.'},
+    rec:{cpu:'Intel Core i5 (4 ядра) / AMD Ryzen 5 или лучше',ram:8,gpu:'1 ГБ VRAM; NVIDIA GTX 650 / AMD Radeon HD 7750 или лучше',gpuVram:null,storage:51,os:'Windows 10 64-bit',notes:'Место на диске с рекомендованными требованиями, может увеличиваться с дополнениями.'},
+    source:'Steam / EA — The Sims 4',url:'https://store.steampowered.com/app/1222670/The_Sims_4/',updated:'Проверено 19.11.2026'
+  },{
+    id:'trackmania', name:'Trackmania', emoji:'🏎️', image:'https://cdn.akamai.steamstatic.com/steam/apps/2225070/header.jpg', genre:'Гонки', tags:['competitive'], category:'competitive', color:'linear-gradient(120deg,#50bdc4,#2b507b)', description:'Аркадные гонки, испытания на время и редактор трасс.',
+    developer:'Ubisoft Nadeo', platform:'Windows 10/11 · 64-bit',
+    min:{cpu:'Intel Core i5-2500K / AMD FX-6100',ram:8,gpu:'NVIDIA GTX 660 / AMD Radeon R9 270X',gpuVram:2,storage:3,os:'Windows 10 64-bit',notes:'Минимум для 1080p/30 FPS по требованиям Ubisoft; DirectX 11.'},
+    rec:{cpu:'Intel Core i5-4690K / AMD Ryzen 5 1500X',ram:8,gpu:'NVIDIA GTX 970 / AMD Radeon RX 480',gpuVram:4,storage:3,os:'Windows 10 64-bit',notes:'Рекомендовано для 1080p/60 FPS; оперативная память в двухканальном режиме.'},
+    source:'Ubisoft Support — Trackmania',url:'https://www.ubisoft.com/en-gb/help/trackmania/gameplay/article/system-requirements-for-trackmania/000081203',updated:'Проверено 19.11.2026'
+  }
+];
+
+const STORAGE_KEYS = {pc:'gamefit_pc_v2', favorites:'gamefit_favorites_v2', theme:'gamefit_theme_v2'};
+const $ = id => document.getElementById(id);
+let activeFilter = 'all';
+let selectedGameId = GAME_DATA[0].id;
+let installPrompt = null;
+
+function safeRead(key, fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch(_){return fallback;}}
+function safeWrite(key, value){try{localStorage.setItem(key,JSON.stringify(value));return true;}catch(_){return false;}}
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2600);}
+function getPc(){return {cpu:$('cpuInput').value.trim(),gpu:$('gpuInput').value.trim(),ram:Number($('ramInput').value)||null,storage:Number($('storageInput').value)||null,os:$('osInput').value,gpuType:$('gpuTypeInput').value};}
+function savePc(showToast=true){const ok=safeWrite(STORAGE_KEYS.pc,getPc());$('saveState').textContent=ok?'● Сохранение включено':'● Не удалось сохранить';if(showToast)toast(ok?'Профиль ПК сохранён в этом браузере.':'Браузер не разрешил сохранить профиль.');}
+function loadPc(){const pc=safeRead(STORAGE_KEYS.pc,{});$('cpuInput').value=pc.cpu||'';$('gpuInput').value=pc.gpu||'';$('ramInput').value=pc.ram||'';$('storageInput').value=pc.storage||'';$('osInput').value=pc.os||'unknown';$('gpuTypeInput').value=pc.gpuType||'unknown';}
+function getFavorites(){const fav=safeRead(STORAGE_KEYS.favorites,[]);return Array.isArray(fav)?fav:[];}
+function toggleFavorite(id){let fav=getFavorites();fav=fav.includes(id)?fav.filter(x=>x!==id):[...fav,id];safeWrite(STORAGE_KEYS.favorites,fav);renderGames();toast(fav.includes(id)?'Добавлено в избранное.':'Удалено из избранного.');}
+function renderGames(){
+  const query=$('gameSearch').value.trim().toLowerCase();const fav=getFavorites();
+  const items=GAME_DATA.filter(g=>(activeFilter==='all'||(activeFilter==='favorites'?fav.includes(g.id):g.tags.includes(activeFilter)))&&(`${g.name} ${g.genre} ${g.description}`.toLowerCase().includes(query)));
+  $('gameGrid').innerHTML=items.map(g=>`<article class="game-card"><div class="game-banner" style="background:${g.color}"><span class="game-emoji" aria-hidden="true">${g.emoji}</span>${g.image?`<img class="game-art-image" src="${g.image}" alt="Обложка игры ${escapeHtml(g.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">`:''}<span class="game-type">${escapeHtml(g.genre.toUpperCase())}</span></div><div class="game-content"><h3>${escapeHtml(g.name)}</h3><p>${escapeHtml(g.description)}</p><div class="game-meta"><span class="meta-pill">RAM: ${g.min.ram} ГБ минимум</span><span class="meta-pill">${g.rec?'Есть рекомендованные':'Минимум'}</span></div><div class="game-actions"><button class="button secondary" data-open-game="${g.id}">Требования →</button><button class="favorite-btn ${fav.includes(g.id)?'active':''}" data-fav="${g.id}" aria-label="${fav.includes(g.id)?'Убрать из':'Добавить в'} избранное">${fav.includes(g.id)?'★':'☆'}</button></div></div></article>`).join('');
+  $('emptyState').classList.toggle('hidden',items.length>0);
+}
+function renderQuickSelect(){ $('quickGameSelect').innerHTML=GAME_DATA.map(g=>`<option value="${g.id}">${escapeHtml(g.name)}</option>`).join('');updateQuickPreview();}
+function getGame(id){return GAME_DATA.find(g=>g.id===id)||GAME_DATA[0];}
+function updateQuickPreview(){selectedGameId=$('quickGameSelect').value;const g=getGame(selectedGameId);$('quickGameArt').style.background=g.color;$('quickGameArt').innerHTML=`<span class="preview-fallback" aria-hidden="true">${g.emoji}</span>${g.image?`<img src="${g.image}" alt="Обложка ${escapeHtml(g.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">`:''}`;$('quickGameTitle').textContent=g.name;$('quickGameDesc').textContent=g.description;}
+function renderReqLine(label,value){return `<div class="req-row"><span>${label}</span><b>${escapeHtml(value??'Не указано')}</b></div>`;}
+function openGameDetail(id){const g=getGame(id);$('quickGameSelect').value=g.id;updateQuickPreview();$('checker').scrollIntoView({behavior:'smooth'});$('resultPanel').classList.remove('hidden');$('resultPanel').innerHTML=`<div class="detail-head"><div><div class="panel-kicker">СИСТЕМНЫЕ ТРЕБОВАНИЯ · ${escapeHtml(g.updated)}</div><h3>${g.emoji} ${escapeHtml(g.name)}</h3><p class="result-summary">${escapeHtml(g.description)} <a href="${g.url}" target="_blank" rel="noopener noreferrer">Открыть источник ↗</a></p></div><button class="text-button" id="closeDetail">Скрыть ×</button></div><div class="requirements-columns">${renderRequirementsColumn('Минимальные требования',g.min)}${g.rec?renderRequirementsColumn('Рекомендуемые требования',g.rec):'<div class="requirement-card"><h4>Рекомендованные требования</h4><p class="muted">Издатель не указывает отдельные рекомендованные характеристики на выбранной странице.</p></div>'}</div><p class="result-foot">Источник: ${escapeHtml(g.source)}. Значения могут измениться после обновлений игры. Проверь страницу источника перед покупкой.</p>`;$('closeDetail').addEventListener('click',()=>{$('resultPanel').classList.add('hidden');});}
+function renderRequirementsColumn(title,spec){return `<div class="requirement-card"><h4>${title}</h4>${renderReqLine('Процессор',spec.cpu)}${renderReqLine('Оперативная память',spec.ram+' ГБ')}${renderReqLine('Видеокарта',spec.gpu)}${renderReqLine('Место на диске',spec.storage?spec.storage+' ГБ':'Не указано на странице')}${renderReqLine('ОС',spec.os)}<p class="requirement-note">${escapeHtml(spec.notes||'')}</p></div>`;}
+function checkValue(value, minimum, label, unit=''){if(value===null||value===undefined||value==='')return {state:'unknown',title:'Не указано',detail:`Не указано ${label.toLowerCase()}.`};const pass=value>=minimum;return {state:pass?'good':'bad',title:pass?'Не ниже минимума':'Ниже минимума',detail:`${label}: ${value}${unit}; требуется минимум ${minimum}${unit}.`};}
+function osCheck(os, reqOs){if(os==='unknown')return {state:'unknown',title:'Не указана',detail:'Операционная система не указана.'};const windows=['win10','win11'];if((os==='mac'&&/macos/i.test(reqOs))||(os==='linux'&&/linux/i.test(reqOs)))return {state:'good',title:'ОС указана в списке',detail:'Эта операционная система упомянута на странице требований; проверь точную версию.'};if(reqOs.toLowerCase().includes('windows')){if(windows.includes(os))return {state:'good',title:'Windows',detail:'Указана Windows 10/11. Точная версия и сборка могут иметь значение.'};return {state:'bad',title:'Возможно, несовместима',detail:'Введённая ОС отличается от опубликованного требования Windows.'};}if(os==='mac'||os==='linux')return {state:'unknown',title:'Проверь вручную',detail:'Нужно сверить конкретную ОС и версию с источником.'};return {state:'unknown',title:'Не указана',detail:'ОС не удалось проверить.'};}
+function itemHtml(label,result){return `<div class="check-item ${result.state}"><span>${label}</span><b>${escapeHtml(result.title)}</b><p>${escapeHtml(result.detail)}</p></div>`;}
+function runCheck(){savePc(false);const g=getGame($('quickGameSelect').value);const pc=getPc();const checks=[];const requiredRam=(g.id==='minecraft-java'&&pc.gpuType==='integrated')?12:g.min.ram;checks.push(['RAM',checkValue(pc.ram,requiredRam,'RAM',' ГБ')]);if(g.min.storage!==null)checks.push(['Диск',checkValue(pc.storage,g.min.storage,'Свободное место',' ГБ')]);else checks.push(['Диск',{state:'unknown',title:'Не указано в требованиях',detail:'Источник не указывает минимальный объём места в выбранной карточке.'}]);checks.push(['CPU',{state:'unknown',title:pc.cpu?'Нужно сравнить вручную':'Не указан',detail:pc.cpu?`Введено: ${pc.cpu}. GameFit пока не имеет проверенной базы производительности процессоров.`:'Укажи модель процессора и сравни её с требованиями игры.'}]);checks.push(['GPU',{state:'unknown',title:pc.gpu?'Нужно сравнить вручную':'Не указана',detail:pc.gpu?`Введено: ${pc.gpu}. Точное сравнение видеокарт требует проверенной базы и не сводится к названию.`:'Укажи модель видеокарты и сравни её с требованиями игры.'}]);checks.push(['ОС',osCheck(pc.os,g.min.os)]);
+  const fail=checks.some(x=>x[1].state==='bad');const unknown=checks.some(x=>x[1].state==='unknown');let badge,title,summary;if(fail){badge='badge-bad';title='Есть параметр ниже минимума';summary='По введённым данным обнаружено хотя бы одно несовпадение с минимальными требованиями. Это ещё не полноценный тест производительности.';}else if(unknown){badge='badge-warn';title='Нужны дополнительные проверки';summary='Проверенные числовые параметры не ниже минимума, но CPU/GPU или другие пункты ещё не подтверждены. Нельзя гарантировать запуск.';}else{badge='badge-good';title='Все введённые параметры совпали';summary='По проверенным пунктам значения не ниже минимума. Это не гарантия стабильного FPS или отсутствия проблем.';}
+  $('resultPanel').classList.remove('hidden');$('resultPanel').innerHTML=`<div class="result-head"><div><div class="panel-kicker">РЕЗУЛЬТАТ ПРЕДВАРИТЕЛЬНОЙ ПРОВЕРКИ</div><h3>${g.emoji} ${escapeHtml(g.name)}</h3><p class="result-summary">${escapeHtml(summary)}</p></div><span class="result-badge ${badge}">${escapeHtml(title)}</span></div><div class="check-grid">${checks.map(([l,r])=>itemHtml(l,r)).join('')}</div><div class="result-next"><b>Что делать дальше?</b><p>Сверь модели процессора и видеокарты с требованиями в официальном источнике. Не покупай игру только на основании этой автоматической проверки.</p><div class="result-buttons"><a class="button secondary" href="${g.url}" target="_blank" rel="noopener noreferrer">Официальные требования ↗</a><button class="button secondary" id="downloadReport">Скачать отчёт</button></div></div><p class="result-foot">GameFit не отправляет данные компьютера на сервер. Текущий алгоритм не рассчитывает FPS, не измеряет производительность и не проверяет драйверы, DirectX, нагрев или фактическое состояние устройства.</p>`;$('downloadReport').addEventListener('click',()=>downloadReport(g,checks,title));$('resultPanel').scrollIntoView({behavior:'smooth',block:'nearest'});}
+function downloadReport(game,checks,status){const pc=getPc();const lines=[`GameFit — отчёт проверки`,`Игра: ${game.name}`,`Дата: ${new Date().toLocaleDateString('ru-RU')}`,`Результат: ${status}`,'',`CPU: ${pc.cpu||'не указано'}`,`GPU: ${pc.gpu||'не указано'}`,`RAM: ${pc.ram?pc.ram+' ГБ':'не указано'}`,`Свободное место: ${pc.storage?pc.storage+' ГБ':'не указано'}`,`ОС: ${pc.os}`, '', 'Параметры:',...checks.map(([l,r])=>`${l}: ${r.title} — ${r.detail}`),'',`Источник требований: ${game.url}`,'','Важно: это предварительное сравнение требований, а не тест FPS и не гарантия запуска.'];const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`GameFit-${game.id}-report.txt`;a.click();URL.revokeObjectURL(url);toast('Отчёт сохранён.');}
+function detectHardware(){const out=[];const ram=navigator.deviceMemory;if(ram){out.push(`Браузер сообщил около ${ram} ГБ доступной памяти (это приблизительная оценка, не точный объём установленной RAM). Не подставляю её в проверку автоматически — точное значение лучше посмотреть в Windows.`);}else out.push('Браузер не сообщил приблизительный объём памяти.');const threads=navigator.hardwareConcurrency;if(threads)out.push(`Обнаружено логических потоков CPU: ${threads}. Это не название и не модель процессора.`);else out.push('Число логических потоков CPU недоступно.');let gpu='';try{const canvas=document.createElement('canvas');const gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');if(gl){const ext=gl.getExtension('WEBGL_debug_renderer_info');if(ext)gpu=gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)||'';}}catch(_){}if(gpu){out.push(`Графический адаптер, сообщённый браузером: ${gpu}. Браузер может показывать общее название или виртуальный адаптер.`);if(!$('gpuInput').value)$('gpuInput').value=gpu;}else out.push('Браузер не раскрыл точное название видеокарты.');out.push('ОС не выбирается автоматически: браузер не всегда различает версии Windows.');$('detectOutput').textContent=out.join(' ');$('detectOutput').classList.remove('hidden');savePc(false);toast('Собрана только доступная браузеру информация.');}
+function clearPc(){['cpuInput','gpuInput','ramInput','storageInput'].forEach(id=>$(id).value='');$('osInput').value='unknown';$('gpuTypeInput').value='unknown';safeWrite(STORAGE_KEYS.pc,{});$('resultPanel').classList.add('hidden');$('detectOutput').classList.add('hidden');toast('Поля профиля очищены.');}
+function initTheme(){const theme=safeRead(STORAGE_KEYS.theme,'dark');if(theme==='light')document.body.classList.add('light');$('themeToggle').textContent=document.body.classList.contains('light')?'◐':'☼';}
+function toggleTheme(){const light=document.body.classList.toggle('light');safeWrite(STORAGE_KEYS.theme,light?'light':'dark');$('themeToggle').textContent=light?'◐':'☼';}
+function initEvents(){
+  $('savePcBtn').addEventListener('click',()=>savePc());$('clearPcBtn').addEventListener('click',clearPc);$('detectBtn').addEventListener('click',detectHardware);$('quickGameSelect').addEventListener('change',updateQuickPreview);$('quickCheckBtn').addEventListener('click',runCheck);$('gameSearch').addEventListener('input',renderGames);$('themeToggle').addEventListener('click',toggleTheme);$('menuToggle').addEventListener('click',()=>$('mainNav').classList.toggle('open'));
+  $('filterRow').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;activeFilter=b.dataset.filter;document.querySelectorAll('.filter-chip').forEach(x=>x.classList.toggle('active',x===b));renderGames();});
+  $('gameGrid').addEventListener('click',e=>{const open=e.target.closest('[data-open-game]');const fav=e.target.closest('[data-fav]');if(open)openGameDetail(open.dataset.openGame);if(fav)toggleFavorite(fav.dataset.fav);});
+  ['cpuInput','gpuInput','ramInput','storageInput','osInput','gpuTypeInput'].forEach(id=>$(id).addEventListener('change',()=>savePc(false)));
+  document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',()=>$('mainNav').classList.remove('open')));
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('installBtn').classList.remove('hidden');});
+  $('installBtn').addEventListener('click',async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('installBtn').classList.add('hidden');});
+}
+function registerServiceWorker(){if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+function init(){loadPc();initTheme();renderQuickSelect();renderGames();initEvents();registerServiceWorker();}
+document.addEventListener('DOMContentLoaded',init);
