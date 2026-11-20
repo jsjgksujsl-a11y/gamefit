@@ -188,63 +188,22 @@ const GAME_DATA = [
 const STORAGE_KEYS = {pc:'gamefit_pc_v2', favorites:'gamefit_favorites_v2', theme:'gamefit_theme_v2'};
 const $ = id => document.getElementById(id);
 let supabaseClient=null,signedInUser=null,cloudSyncReady=false,cloudSaveTimer=null;
-function updateAuthView(message){
-  const status=$('authStatus');if(status&&message)status.textContent=message;
-  const out=$('authLoggedOut'),inside=$('authLoggedIn'),section=$('authPanel');
-  if(out)out.classList.toggle('hidden',!!signedInUser);
-  if(inside)inside.classList.toggle('hidden',!signedInUser);
-  if(section)section.classList.toggle('hidden',!!signedInUser);
-  const identity=$('authIdentity');if(identity)identity.textContent=signedInUser?'Вошли как '+signedInUser.email:'';
-  const profile=$('profileMenu'),avatar=$('profileAvatarBtn'),link=$('accountLink');
-  const email=$('profileMenuEmail'),name=$('profileMenuName');
-  const avatarImage=$('profileAvatarImage'),avatarInitial=$('profileAvatarInitial');
-  if(profile)profile.classList.toggle('hidden',!signedInUser);
-  if(link)link.classList.toggle('hidden',!!signedInUser);
-  const metadata=signedInUser?.user_metadata||{};
-  const displayName=metadata.full_name||metadata.name||(signedInUser?.email||'').split('@')[0]||'Профиль';
-  const avatarUrl=metadata.avatar_url||metadata.picture||'';
-  let safeAvatarUrl='';
-  try{const parsed=new URL(avatarUrl);if(parsed.protocol==='https:')safeAvatarUrl=parsed.href;}catch(_){}
-  if(avatar){
-    const initial=(displayName.trim()[0]||'U').toLocaleUpperCase('ru');
-    if(avatarInitial)avatarInitial.textContent=initial;
-    if(avatarImage){
-      avatarImage.onerror=()=>{avatarImage.classList.add('hidden');if(avatarInitial)avatarInitial.classList.remove('hidden');};
-      if(safeAvatarUrl){avatarImage.src=safeAvatarUrl;avatarImage.alt=displayName;avatarImage.classList.remove('hidden');if(avatarInitial)avatarInitial.classList.add('hidden');}
-      else{avatarImage.removeAttribute('src');avatarImage.classList.add('hidden');if(avatarInitial)avatarInitial.classList.remove('hidden');}
-    }
-    avatar.setAttribute('aria-label','Открыть профиль: '+displayName);
-  }
-  if(name)name.textContent=displayName;
-  if(email)email.textContent=signedInUser?signedInUser.email||'':'';
-}
-function authMessage(error){const m=String(error&&error.message||error||'Неизвестная ошибка');if(/invalid login credentials/i.test(m))return 'Неверная почта или пароль.';if(/email not confirmed/i.test(m))return 'Подтверди почту по ссылке из письма.';if(/password should be at least/i.test(m))return 'Пароль должен содержать не менее 8 символов.';if(/user already registered/i.test(m))return 'Эта почта уже зарегистрирована. Попробуй войти.';const status=error&&error.status?` (HTTP ${error.status})`:'';return m+status;}
+function updateAuthView(message){const status=$('authStatus');if(status&&message)status.textContent=message;const out=$('authLoggedOut'),inside=$('authLoggedIn');if(out)out.classList.toggle('hidden',!!signedInUser);if(inside)inside.classList.toggle('hidden',!signedInUser);const identity=$('authIdentity');if(identity)identity.textContent=signedInUser?'Вошли как '+signedInUser.email:'';}
+function authMessage(error){const m=String(error&&error.message||'');if(/invalid login credentials/i.test(m))return 'Неверная почта или пароль.';if(/email not confirmed/i.test(m))return 'Подтверди почту по ссылке из письма.';if(/password should be at least/i.test(m))return 'Пароль должен содержать не менее 8 символов.';if(/user already registered/i.test(m))return 'Эта почта уже зарегистрирована. Попробуй войти.';return 'Не удалось выполнить действие. Проверь настройки Supabase и подключение.';}
 async function loadCloudData(){if(!supabaseClient||!signedInUser)return;const {data,error}=await supabaseClient.from('gamefit_user_data').select('pc,favorites,theme').eq('user_id',signedInUser.id).maybeSingle();if(error){cloudSyncReady=false;updateAuthView('Вход выполнен, но не удалось загрузить облачные данные. Проверь таблицу и RLS.');return;}if(data){safeWrite(STORAGE_KEYS.pc,data.pc||{});safeWrite(STORAGE_KEYS.favorites,Array.isArray(data.favorites)?data.favorites:[]);safeWrite(STORAGE_KEYS.theme,data.theme==='light'?'light':'dark');loadPc();initTheme();renderGames();}cloudSyncReady=true;if(!data)await saveCloudData();else updateAuthView('Аккаунт подключён. Профиль ПК, избранное и тема синхронизируются.');}
 async function saveCloudData(){if(!supabaseClient||!signedInUser||!cloudSyncReady)return;const payload={user_id:signedInUser.id,pc:getPc(),favorites:getFavorites(),theme:document.body.classList.contains('light')?'light':'dark',updated_at:new Date().toISOString()};const {error}=await supabaseClient.from('gamefit_user_data').upsert(payload,{onConflict:'user_id'});if(error)updateAuthView('Облако временно недоступно. Локальная копия осталась на устройстве.');else updateAuthView('Изменения синхронизированы с облаком.');}
 function queueCloudSync(){if(!signedInUser||!cloudSyncReady)return;clearTimeout(cloudSaveTimer);cloudSaveTimer=setTimeout(saveCloudData,700);}
 async function finishSignIn(user){signedInUser=user||null;cloudSyncReady=false;updateAuthView(signedInUser?'Вход выполнен. Загружаем профиль…':'Выполнен выход. Локальные данные сохранены.');if(signedInUser)await loadCloudData();}
-async function initAuth(){
+function initAuth(){
   // Сначала подключаем обработчики, чтобы кнопка не зависела от скорости ответа Supabase.
   $('googleSignInBtn').addEventListener('click',async()=>{
-    if(!supabaseClient){updateAuthView('Supabase ещё не подключён. Проверь настройки проекта.');return;}
-    updateAuthView('Связываемся с Supabase…');
+    if(!supabaseClient){updateAuthView('Подключение Supabase ещё не готово. Обнови страницу через несколько секунд.');return;}
+    updateAuthView('Открываем безопасный вход Google…');
     try{
-      const redirectTo=new URL('/',location.origin).href;
-      const {data,error}=await supabaseClient.auth.signInWithOAuth({
-        provider:'google',
-        options:{redirectTo,skipBrowserRedirect:true,queryParams:{prompt:'select_account'}}
-      });
-      if(error){updateAuthView('Google-вход: '+authMessage(error));return;}
-      if(!data||!data.url){updateAuthView('Supabase не вернул ссылку Google. Проверь, включён ли Google в Authentication → Providers.');return;}
-      const authUrl=new URL(data.url);
-      const projectOrigin=new URL(window.GAMEFIT_SUPABASE_CONFIG.url).origin;
-      if(authUrl.origin!==projectOrigin||!authUrl.pathname.endsWith('/auth/v1/authorize')){
-        updateAuthView('Получена неправильная ссылка авторизации: '+authUrl.origin+authUrl.pathname);return;
-      }
-      updateAuthView('Открываем страницу Google…');
-      window.location.replace(authUrl.href);
+      const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
+      if(error)updateAuthView('Ошибка входа Google: '+authMessage(error));
     }catch(error){
-      updateAuthView('Ошибка запуска Google-входа: '+authMessage(error));
+      updateAuthView('Не удалось открыть Google: '+authMessage(error));
     }
   });
   $('signUpBtn').addEventListener('click',async()=>{
@@ -268,35 +227,13 @@ async function initAuth(){
       await finishSignIn(data.user);
     }catch(error){updateAuthView(authMessage(error));}
   });
-  const signOut=async()=>{
+  $('signOutBtn').addEventListener('click',async()=>{
     if(!supabaseClient)return;
     try{
       const {error}=await supabaseClient.auth.signOut();
       if(error){updateAuthView('Не удалось выйти. Попробуй ещё раз.');return;}
-      $('profileDropdown')?.classList.add('hidden');
       await finishSignIn(null);
     }catch(error){updateAuthView(authMessage(error));}
-  };
-  $('signOutBtn').addEventListener('click',signOut);
-  $('profileSignOutBtn').addEventListener('click',signOut);
-  $('profileAvatarBtn').addEventListener('click',()=>{
-    const menu=$('profileDropdown');
-    const willOpen=menu.classList.contains('hidden');
-    menu.classList.toggle('hidden',!willOpen);
-    $('profileAvatarBtn').setAttribute('aria-expanded',String(willOpen));
-  });
-  document.addEventListener('click',event=>{
-    const wrap=$('profileMenu');
-    if(wrap&&!wrap.contains(event.target)){
-      $('profileDropdown')?.classList.add('hidden');
-      $('profileAvatarBtn')?.setAttribute('aria-expanded','false');
-    }
-  });
-  document.addEventListener('keydown',event=>{
-    if(event.key==='Escape'){
-      $('profileDropdown')?.classList.add('hidden');
-      $('profileAvatarBtn')?.setAttribute('aria-expanded','false');
-    }
   });
 
   const config=window.GAMEFIT_SUPABASE_CONFIG||{};
