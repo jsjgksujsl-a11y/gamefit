@@ -8,7 +8,7 @@
   <title>GameFit — проверка ПК для игр</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
   <div class="bg-glow glow-a"></div><div class="bg-glow glow-b"></div>
@@ -17,7 +17,7 @@
     <nav class="nav" id="mainNav" aria-label="Главная навигация">
       <a href="#catalog">Каталог игр</a><a href="#checker">Проверить ПК</a><a href="#how">Как работает</a>
     </nav>
-    <div class="top-actions"><a class="button mini secondary account-link" id="accountLink" href="#authPanel">Аккаунт</a><div class="profile-menu hidden" id="profileMenu"><button class="profile-avatar" id="profileAvatarBtn" type="button" aria-label="Открыть профиль" aria-expanded="false">U</button><div class="profile-dropdown hidden" id="profileDropdown"><div class="profile-dropdown-title">Твой аккаунт</div><div class="profile-email" id="profileMenuEmail"></div><button class="profile-logout" id="profileSignOutBtn" type="button">Выйти из аккаунта</button></div></div><button class="icon-button" id="themeToggle" title="Переключить тему" aria-label="Переключить тему">☼</button><button class="install-button hidden" id="installBtn">Установить приложение</button><button class="menu-button" id="menuToggle" aria-label="Открыть меню">☰</button></div>
+    <div class="top-actions"><a class="button mini secondary account-link" id="accountLink" href="#authPanel">Аккаунт</a><div class="profile-menu hidden" id="profileMenu"><button class="profile-avatar" id="profileAvatarBtn" type="button" aria-label="Открыть профиль" aria-expanded="false"><img class="profile-avatar-image hidden" id="profileAvatarImage" alt=""><span id="profileAvatarInitial">U</span></button><div class="profile-dropdown hidden" id="profileDropdown"><div class="profile-dropdown-title">Твой аккаунт</div><div class="profile-name" id="profileMenuName">Профиль</div><div class="profile-email" id="profileMenuEmail"></div><button class="profile-logout" id="profileSignOutBtn" type="button">Выйти из аккаунта</button></div></div><button class="icon-button" id="themeToggle" title="Переключить тему" aria-label="Переключить тему">☼</button><button class="install-button hidden" id="installBtn">Установить приложение</button><button class="menu-button" id="menuToggle" aria-label="Открыть меню">☰</button></div>
   </header>
 
   <section class="section-wrap account-section" id="authPanel"><div class="panel auth-panel"><div><div class="panel-kicker">GAMEFIT ACCOUNT</div><h2>Твой профиль на всех устройствах</h2><p class="muted">Создай аккаунт, чтобы синхронизировать профиль ПК и избранные игры. Без входа сайт продолжает работать локально.</p></div><div id="authLoggedOut"><button class="button google-signin" id="googleSignInBtn" type="button"><span class="google-mark" aria-hidden="true">G</span>Войти через Google</button><div class="auth-divider"><span>или через почту</span></div><div class="auth-fields"><label class="field"><span>Электронная почта</span><input id="authEmail" type="email" autocomplete="email" placeholder="name@example.com"></label><label class="field"><span>Пароль (минимум 8 символов)</span><input id="authPassword" type="password" minlength="8" autocomplete="current-password" placeholder="Не менее 8 символов"></label></div><div class="form-actions"><button class="button primary" id="signUpBtn" type="button">Создать аккаунт</button><button class="button secondary" id="signInBtn" type="button">Войти</button></div></div><div id="authLoggedIn" class="hidden"><b id="authIdentity"></b><div class="form-actions"><button class="button secondary" id="signOutBtn" type="button">Выйти</button></div></div><p class="auth-status" id="authStatus" role="status" aria-live="polite">Облачная синхронизация требует настройки Supabase.</p></div></section>
@@ -100,6 +100,6 @@
   </main>
   <footer class="footer"><a class="brand" href="#home"><span class="brand-mark">G</span><span>GAME<span class="brand-accent">FIT</span></span></a><span>Независимый экспериментальный проект · 2026</span><span><a href="about.html">О проекте</a> · <a href="privacy.html">Конфиденциальность</a></span></footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js?v=3"></script><script src="app.js?v=3"></script><script src="auth-bridge.js?v=1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js?v=3"></script><script src="app.js?v=4"></script><script src="auth-bridge.js?v=1"></script>
 </body>
 </html>
