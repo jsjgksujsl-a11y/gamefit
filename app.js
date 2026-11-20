@@ -186,6 +186,7 @@ const GAME_DATA = [
 ];
 
 const STORAGE_KEYS = {pc:'gamefit_pc_v2', favorites:'gamefit_favorites_v2', theme:'gamefit_theme_v2'};
+const $ = id => document.getElementById(id);
 let supabaseClient=null,signedInUser=null,cloudSyncReady=false,cloudSaveTimer=null;
 function updateAuthView(message){const status=$('authStatus');if(status&&message)status.textContent=message;const out=$('authLoggedOut'),inside=$('authLoggedIn');if(out)out.classList.toggle('hidden',!!signedInUser);if(inside)inside.classList.toggle('hidden',!signedInUser);const identity=$('authIdentity');if(identity)identity.textContent=signedInUser?'Вошли как '+signedInUser.email:'';}
 function authMessage(error){const m=String(error&&error.message||'');if(/invalid login credentials/i.test(m))return 'Неверная почта или пароль.';if(/email not confirmed/i.test(m))return 'Подтверди почту по ссылке из письма.';if(/password should be at least/i.test(m))return 'Пароль должен содержать не менее 8 символов.';if(/user already registered/i.test(m))return 'Эта почта уже зарегистрирована. Попробуй войти.';return 'Не удалось выполнить действие. Проверь настройки Supabase и подключение.';}
@@ -204,7 +205,7 @@ $('signUpBtn').addEventListener('click',async()=>{if(!supabaseClient){updateAuth
 $('signInBtn').addEventListener('click',async()=>{if(!supabaseClient){updateAuthView('Сначала настрой Supabase: заполни supabase-config.js и выполни SQL из supabase-schema.sql.');return;}const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||!password){updateAuthView('Введи почту и пароль.');return;}const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error){updateAuthView(authMessage(error));return;}await finishSignIn(data.user);});
 $('signOutBtn').addEventListener('click',async()=>{if(!supabaseClient)return;const {error}=await supabaseClient.auth.signOut();if(error){updateAuthView('Не удалось выйти. Попробуй ещё раз.');return;}await finishSignIn(null);});}
 
-const $ = id => document.getElementById(id);
+
 let activeFilter = 'all';
 let selectedGameId = GAME_DATA[0].id;
 let installPrompt = null;
