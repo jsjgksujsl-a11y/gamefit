@@ -223,7 +223,7 @@ async function loadCloudData(){if(!supabaseClient||!signedInUser)return;const {d
 async function saveCloudData(){if(!supabaseClient||!signedInUser||!cloudSyncReady)return;const payload={user_id:signedInUser.id,pc:getPc(),favorites:getFavorites(),theme:document.body.classList.contains('light')?'light':'dark',updated_at:new Date().toISOString()};const {error}=await supabaseClient.from('gamefit_user_data').upsert(payload,{onConflict:'user_id'});if(error)updateAuthView('Облако временно недоступно. Локальная копия осталась на устройстве.');else updateAuthView('Изменения синхронизированы с облаком.');}
 function queueCloudSync(){if(!signedInUser||!cloudSyncReady)return;clearTimeout(cloudSaveTimer);cloudSaveTimer=setTimeout(saveCloudData,700);}
 async function finishSignIn(user){signedInUser=user||null;cloudSyncReady=false;updateAuthView(signedInUser?'Вход выполнен. Загружаем профиль…':'Выполнен выход. Локальные данные сохранены.');if(signedInUser)await loadCloudData();}
-function initAuth(){
+async function initAuth(){
   // Сначала подключаем обработчики, чтобы кнопка не зависела от скорости ответа Supabase.
   $('googleSignInBtn').addEventListener('click',async()=>{
     if(!supabaseClient){updateAuthView('Подключение Supabase ещё не готово. Обнови страницу через несколько секунд.');return;}
