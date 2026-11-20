@@ -27,6 +27,12 @@
 .auth-panel h2{font-size:clamp(20px,3vw,29px);margin:8px 0}
 .auth-panel .muted{font-size:11px;line-height:1.7;max-width:540px}
 .auth-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.google-signin{width:100%;min-height:46px;display:flex;align-items:center;justify-content:center;gap:11px;background:#fff;color:#202124;border:1px solid #dadce0;font-weight:700;box-shadow:0 2px 5px #00000012}
+.google-signin:hover{background:#f8faff;filter:none}
+.google-mark{font-size:21px;font-weight:800;color:#4285f4;font-family:Arial,sans-serif}
+.auth-divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:10px;margin:14px 0}
+.auth-divider:before,.auth-divider:after{content:"";height:1px;background:var(--line);flex:1}
+
 .auth-fields .field input{width:100%;min-width:0}
 .auth-status{grid-column:1/-1;font-size:10px;color:var(--muted);line-height:1.6;margin:4px 0 0}
 .account-link{white-space:nowrap}
