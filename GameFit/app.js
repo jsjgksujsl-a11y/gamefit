@@ -218,7 +218,7 @@ function updateAuthView(message){
   if(name)name.textContent=displayName;
   if(email)email.textContent=signedInUser?signedInUser.email||'':'';
 }
-function authMessage(error){const m=String(error&&error.message||'');if(/invalid login credentials/i.test(m))return 'Неверная почта или пароль.';if(/email not confirmed/i.test(m))return 'Подтверди почту по ссылке из письма.';if(/password should be at least/i.test(m))return 'Пароль должен содержать не менее 8 символов.';if(/user already registered/i.test(m))return 'Эта почта уже зарегистрирована. Попробуй войти.';return 'Не удалось выполнить действие. Проверь настройки Supabase и подключение.';}
+function authMessage(error){const m=String(error&&error.message||error||'Неизвестная ошибка');if(/invalid login credentials/i.test(m))return 'Неверная почта или пароль.';if(/email not confirmed/i.test(m))return 'Подтверди почту по ссылке из письма.';if(/password should be at least/i.test(m))return 'Пароль должен содержать не менее 8 символов.';if(/user already registered/i.test(m))return 'Эта почта уже зарегистрирована. Попробуй войти.';const status=error&&error.status?` (HTTP ${error.status})`:'';return m+status;}
 async function loadCloudData(){if(!supabaseClient||!signedInUser)return;const {data,error}=await supabaseClient.from('gamefit_user_data').select('pc,favorites,theme').eq('user_id',signedInUser.id).maybeSingle();if(error){cloudSyncReady=false;updateAuthView('Вход выполнен, но не удалось загрузить облачные данные. Проверь таблицу и RLS.');return;}if(data){safeWrite(STORAGE_KEYS.pc,data.pc||{});safeWrite(STORAGE_KEYS.favorites,Array.isArray(data.favorites)?data.favorites:[]);safeWrite(STORAGE_KEYS.theme,data.theme==='light'?'light':'dark');loadPc();initTheme();renderGames();}cloudSyncReady=true;if(!data)await saveCloudData();else updateAuthView('Аккаунт подключён. Профиль ПК, избранное и тема синхронизируются.');}
 async function saveCloudData(){if(!supabaseClient||!signedInUser||!cloudSyncReady)return;const payload={user_id:signedInUser.id,pc:getPc(),favorites:getFavorites(),theme:document.body.classList.contains('light')?'light':'dark',updated_at:new Date().toISOString()};const {error}=await supabaseClient.from('gamefit_user_data').upsert(payload,{onConflict:'user_id'});if(error)updateAuthView('Облако временно недоступно. Локальная копия осталась на устройстве.');else updateAuthView('Изменения синхронизированы с облаком.');}
 function queueCloudSync(){if(!signedInUser||!cloudSyncReady)return;clearTimeout(cloudSaveTimer);cloudSaveTimer=setTimeout(saveCloudData,700);}
@@ -226,16 +226,25 @@ async function finishSignIn(user){signedInUser=user||null;cloudSyncReady=false;u
 async function initAuth(){
   // Сначала подключаем обработчики, чтобы кнопка не зависела от скорости ответа Supabase.
   $('googleSignInBtn').addEventListener('click',async()=>{
-    if(!supabaseClient){updateAuthView('Подключение Supabase ещё не готово. Обнови страницу через несколько секунд.');return;}
-    updateAuthView('Открываем безопасный вход Google…');
+    if(!supabaseClient){updateAuthView('Supabase ещё не подключён. Проверь настройки проекта.');return;}
+    updateAuthView('Связываемся с Supabase…');
     try{
-      const {data,error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname,skipBrowserRedirect:true}});
-      if(error){updateAuthView('Ошибка входа Google: '+authMessage(error));return;}
-      if(!data||!data.url){updateAuthView('Supabase не вернул ссылку входа Google. Проверь провайдера Google в Supabase.');return;}
-      updateAuthView('Перенаправляем на Google…');
-      window.location.assign(data.url);
+      const redirectTo=new URL('/',location.origin).href;
+      const {data,error}=await supabaseClient.auth.signInWithOAuth({
+        provider:'google',
+        options:{redirectTo,skipBrowserRedirect:true,queryParams:{prompt:'select_account'}}
+      });
+      if(error){updateAuthView('Google-вход: '+authMessage(error));return;}
+      if(!data||!data.url){updateAuthView('Supabase не вернул ссылку Google. Проверь, включён ли Google в Authentication → Providers.');return;}
+      const authUrl=new URL(data.url);
+      const projectOrigin=new URL(window.GAMEFIT_SUPABASE_CONFIG.url).origin;
+      if(authUrl.origin!==projectOrigin||!authUrl.pathname.endsWith('/auth/v1/authorize')){
+        updateAuthView('Получена неправильная ссылка авторизации: '+authUrl.origin+authUrl.pathname);return;
+      }
+      updateAuthView('Открываем страницу Google…');
+      window.location.replace(authUrl.href);
     }catch(error){
-      updateAuthView('Не удалось открыть Google: '+authMessage(error));
+      updateAuthView('Ошибка запуска Google-входа: '+authMessage(error));
     }
   });
   $('signUpBtn').addEventListener('click',async()=>{
