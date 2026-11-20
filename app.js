@@ -195,11 +195,28 @@ function updateAuthView(message){
   if(inside)inside.classList.toggle('hidden',!signedInUser);
   if(section)section.classList.toggle('hidden',!!signedInUser);
   const identity=$('authIdentity');if(identity)identity.textContent=signedInUser?'Вошли как '+signedInUser.email:'';
-  const profile=$('profileMenu'),avatar=$('profileAvatarBtn'),link=$('accountLink'),email=$('profileMenuEmail');
+  const profile=$('profileMenu'),avatar=$('profileAvatarBtn'),link=$('accountLink');
+  const email=$('profileMenuEmail'),name=$('profileMenuName');
+  const avatarImage=$('profileAvatarImage'),avatarInitial=$('profileAvatarInitial');
   if(profile)profile.classList.toggle('hidden',!signedInUser);
   if(link)link.classList.toggle('hidden',!!signedInUser);
-  if(avatar){const label=(signedInUser&&(signedInUser.email||'U').trim()[0]||'U').toUpperCase();avatar.textContent=label;avatar.setAttribute('aria-label','Профиль: '+(signedInUser.email||'аккаунт'));}
-  if(email)email.textContent=signedInUser?signedInUser.email:'';
+  const metadata=signedInUser?.user_metadata||{};
+  const displayName=metadata.full_name||metadata.name||(signedInUser?.email||'').split('@')[0]||'Профиль';
+  const avatarUrl=metadata.avatar_url||metadata.picture||'';
+  let safeAvatarUrl='';
+  try{const parsed=new URL(avatarUrl);if(parsed.protocol==='https:')safeAvatarUrl=parsed.href;}catch(_){}
+  if(avatar){
+    const initial=(displayName.trim()[0]||'U').toLocaleUpperCase('ru');
+    if(avatarInitial)avatarInitial.textContent=initial;
+    if(avatarImage){
+      avatarImage.onerror=()=>{avatarImage.classList.add('hidden');if(avatarInitial)avatarInitial.classList.remove('hidden');};
+      if(safeAvatarUrl){avatarImage.src=safeAvatarUrl;avatarImage.alt=displayName;avatarImage.classList.remove('hidden');if(avatarInitial)avatarInitial.classList.add('hidden');}
+      else{avatarImage.removeAttribute('src');avatarImage.classList.add('hidden');if(avatarInitial)avatarInitial.classList.remove('hidden');}
+    }
+    avatar.setAttribute('aria-label','Открыть профиль: '+displayName);
+  }
+  if(name)name.textContent=displayName;
+  if(email)email.textContent=signedInUser?signedInUser.email||'':'';
 }
 function authMessage(error){const m=String(error&&error.message||'');if(/invalid login credentials/i.test(m))return 'Неверная почта или пароль.';if(/email not confirmed/i.test(m))return 'Подтверди почту по ссылке из письма.';if(/password should be at least/i.test(m))return 'Пароль должен содержать не менее 8 символов.';if(/user already registered/i.test(m))return 'Эта почта уже зарегистрирована. Попробуй войти.';return 'Не удалось выполнить действие. Проверь настройки Supabase и подключение.';}
 async function loadCloudData(){if(!supabaseClient||!signedInUser)return;const {data,error}=await supabaseClient.from('gamefit_user_data').select('pc,favorites,theme').eq('user_id',signedInUser.id).maybeSingle();if(error){cloudSyncReady=false;updateAuthView('Вход выполнен, но не удалось загрузить облачные данные. Проверь таблицу и RLS.');return;}if(data){safeWrite(STORAGE_KEYS.pc,data.pc||{});safeWrite(STORAGE_KEYS.favorites,Array.isArray(data.favorites)?data.favorites:[]);safeWrite(STORAGE_KEYS.theme,data.theme==='light'?'light':'dark');loadPc();initTheme();renderGames();}cloudSyncReady=true;if(!data)await saveCloudData();else updateAuthView('Аккаунт подключён. Профиль ПК, избранное и тема синхронизируются.');}
