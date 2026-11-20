@@ -229,8 +229,11 @@ async function initAuth(){
     if(!supabaseClient){updateAuthView('Подключение Supabase ещё не готово. Обнови страницу через несколько секунд.');return;}
     updateAuthView('Открываем безопасный вход Google…');
     try{
-      const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
-      if(error)updateAuthView('Ошибка входа Google: '+authMessage(error));
+      const {data,error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname,skipBrowserRedirect:true}});
+      if(error){updateAuthView('Ошибка входа Google: '+authMessage(error));return;}
+      if(!data||!data.url){updateAuthView('Supabase не вернул ссылку входа Google. Проверь провайдера Google в Supabase.');return;}
+      updateAuthView('Перенаправляем на Google…');
+      window.location.assign(data.url);
     }catch(error){
       updateAuthView('Не удалось открыть Google: '+authMessage(error));
     }
