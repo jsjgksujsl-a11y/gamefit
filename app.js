@@ -194,16 +194,71 @@ async function loadCloudData(){if(!supabaseClient||!signedInUser)return;const {d
 async function saveCloudData(){if(!supabaseClient||!signedInUser||!cloudSyncReady)return;const payload={user_id:signedInUser.id,pc:getPc(),favorites:getFavorites(),theme:document.body.classList.contains('light')?'light':'dark',updated_at:new Date().toISOString()};const {error}=await supabaseClient.from('gamefit_user_data').upsert(payload,{onConflict:'user_id'});if(error)updateAuthView('Облако временно недоступно. Локальная копия осталась на устройстве.');else updateAuthView('Изменения синхронизированы с облаком.');}
 function queueCloudSync(){if(!signedInUser||!cloudSyncReady)return;clearTimeout(cloudSaveTimer);cloudSaveTimer=setTimeout(saveCloudData,700);}
 async function finishSignIn(user){signedInUser=user||null;cloudSyncReady=false;updateAuthView(signedInUser?'Вход выполнен. Загружаем профиль…':'Выполнен выход. Локальные данные сохранены.');if(signedInUser)await loadCloudData();}
-async function initAuth(){const config=window.GAMEFIT_SUPABASE_CONFIG||{};if(window.supabase&&config.url&&config.anonKey&&!config.url.includes('YOUR_PROJECT')&&!config.anonKey.includes('YOUR_SUPABASE')){try{supabaseClient=window.supabase.createClient(config.url,config.anonKey);const {data}=await supabaseClient.auth.getSession();if(data.session)await finishSignIn(data.session.user);supabaseClient.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>finishSignIn(session&&session.user),0);});}catch(_){updateAuthView('Не удалось подключить Supabase. Проверь URL и публичный ключ проекта.');}}else updateAuthView('Локальный режим активен. Для аккаунтов настрой Supabase: инструкция в README и supabase-schema.sql.');
-$('googleSignInBtn').addEventListener('click',async()=>{
-  if(!supabaseClient){updateAuthView('Сначала подключи Supabase и включи Google в Authentication → Providers. Инструкция есть в README.');return;}
-  updateAuthView('Открываем безопасный вход Google…');
-  const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
-  if(error)updateAuthView('Не удалось начать вход через Google. Проверь настройки Google Provider в Supabase.');
-});
-$('signUpBtn').addEventListener('click',async()=>{if(!supabaseClient){updateAuthView('Сначала настрой Supabase: заполни supabase-config.js и выполни SQL из supabase-schema.sql.');return;}const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||password.length<8){updateAuthView('Введи почту и пароль не короче 8 символов.');return;}const {data,error}=await supabaseClient.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});if(error){updateAuthView(authMessage(error));return;}if(data.session)await finishSignIn(data.session.user);else updateAuthView('Открой письмо от Supabase и подтверди адрес электронной почты.');});
-$('signInBtn').addEventListener('click',async()=>{if(!supabaseClient){updateAuthView('Сначала настрой Supabase: заполни supabase-config.js и выполни SQL из supabase-schema.sql.');return;}const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||!password){updateAuthView('Введи почту и пароль.');return;}const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error){updateAuthView(authMessage(error));return;}await finishSignIn(data.user);});
-$('signOutBtn').addEventListener('click',async()=>{if(!supabaseClient)return;const {error}=await supabaseClient.auth.signOut();if(error){updateAuthView('Не удалось выйти. Попробуй ещё раз.');return;}await finishSignIn(null);});}
+function initAuth(){
+  // Сначала подключаем обработчики, чтобы кнопка не зависела от скорости ответа Supabase.
+  $('googleSignInBtn').addEventListener('click',async()=>{
+    if(!supabaseClient){updateAuthView('Подключение Supabase ещё не готово. Обнови страницу через несколько секунд.');return;}
+    updateAuthView('Открываем безопасный вход Google…');
+    try{
+      const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
+      if(error)updateAuthView('Ошибка входа Google: '+authMessage(error));
+    }catch(error){
+      updateAuthView('Не удалось открыть Google: '+authMessage(error));
+    }
+  });
+  $('signUpBtn').addEventListener('click',async()=>{
+    if(!supabaseClient){updateAuthView('Подключение Supabase ещё не готово. Обнови страницу через несколько секунд.');return;}
+    const email=$('authEmail').value.trim(),password=$('authPassword').value;
+    if(!email||password.length<8){updateAuthView('Введи почту и пароль не короче 8 символов.');return;}
+    try{
+      const {data,error}=await supabaseClient.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});
+      if(error){updateAuthView(authMessage(error));return;}
+      if(data.session)await finishSignIn(data.session.user);
+      else updateAuthView('Открой письмо от Supabase и подтверди адрес электронной почты.');
+    }catch(error){updateAuthView(authMessage(error));}
+  });
+  $('signInBtn').addEventListener('click',async()=>{
+    if(!supabaseClient){updateAuthView('Подключение Supabase ещё не готово.');return;}
+    const email=$('authEmail').value.trim(),password=$('authPassword').value;
+    if(!email||!password){updateAuthView('Введи почту и пароль.');return;}
+    try{
+      const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+      if(error){updateAuthView(authMessage(error));return;}
+      await finishSignIn(data.user);
+    }catch(error){updateAuthView(authMessage(error));}
+  });
+  $('signOutBtn').addEventListener('click',async()=>{
+    if(!supabaseClient)return;
+    try{
+      const {error}=await supabaseClient.auth.signOut();
+      if(error){updateAuthView('Не удалось выйти. Попробуй ещё раз.');return;}
+      await finishSignIn(null);
+    }catch(error){updateAuthView(authMessage(error));}
+  });
+
+  const config=window.GAMEFIT_SUPABASE_CONFIG||{};
+  if(!window.supabase){
+    updateAuthView('Не загрузилась библиотека авторизации. Проверь подключение к интернету и обнови страницу.');
+    return;
+  }
+  if(!config.url||!config.anonKey||config.url.includes('YOUR_PROJECT')||config.anonKey.includes('YOUR_SUPABASE')){
+    updateAuthView('Локальный режим активен. Настройки Supabase не заполнены.');
+    return;
+  }
+  try{
+    supabaseClient=window.supabase.createClient(config.url,config.anonKey);
+    supabaseClient.auth.onAuthStateChange((_event,session)=>{
+      setTimeout(()=>finishSignIn(session&&session.user),0);
+    });
+    const {data,error}=await supabaseClient.auth.getSession();
+    if(error)updateAuthView('Supabase подключён, но не удалось проверить сессию: '+authMessage(error));
+    else if(data.session)await finishSignIn(data.session.user);
+    else updateAuthView('Войди через Google или электронную почту.');
+  }catch(error){
+    supabaseClient=null;
+    updateAuthView('Не удалось подключить Supabase: '+authMessage(error));
+  }
+}
 
 
 let activeFilter = 'all';
