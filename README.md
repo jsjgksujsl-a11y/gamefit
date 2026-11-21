@@ -36,3 +36,5 @@ python -m http.server 8000
 - `supabase-config.js` — URL проекта и публичный ключ.
 - `supabase-schema.sql` — таблица и политики RLS.
 - `privacy.html` — сведения о локальном и облачном режиме.
+
+<!-- Analytics activation redeploy -->
